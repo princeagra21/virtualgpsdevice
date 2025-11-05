@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../data.db"
+}
+
+model Endpoint {
+  id          String        @id @default(cuid())
+  name        String
+  ip          String
+  port        Int
+  createdAt   DateTime      @default(now())
+  SendHistory SendHistory[]
+
+  @@map("endpoints")
+}
+
+model SendHistory {
+  id              String   @id @default(cuid())
+  endpointId      String
+  protocol        String
+  packetType      String
+  payloadJson     String   // JSON stored as text
+  rawHex          String
+  bytesSent       Int
+  bytesReceived   Int
+  status          String   // "OK" or "ERROR"
+  errorMessage    String?
+  ackHex          String?
+  createdAt       DateTime @default(now())
+  
+  endpoint        Endpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+
+  @@map("send_history")
+}
+
+model Setting {
+  key   String @id
+  value String // JSON stored as text
+
+  @@map("settings")
+}
+
+model Imei {
+  id        String   @id @default(cuid())
+  imei      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+
+  @@map("imeis")
+}
+
